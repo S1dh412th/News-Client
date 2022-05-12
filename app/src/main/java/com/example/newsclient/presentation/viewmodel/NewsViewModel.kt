@@ -58,4 +58,8 @@ class NewsViewModel(
         localRepository.deleteArticlesFromDB(article)
     }
 
+    fun updateNews(q: String) = viewModelScope.launch {
+        newsMutableFlow.value = newsRepository.getNewsTopHeadlines(q, apikey)
+    }
+
 }

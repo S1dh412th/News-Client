@@ -1,12 +1,11 @@
 package com.example.newsclient
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -33,6 +32,24 @@ class NewsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding?.svNews?.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(p0: String?): Boolean {
+                    if (p0 != null) {
+                        newsViewModel.updateNews(p0)
+                    }
+                    getNews(1)
+                    return false
+                }
+
+                override fun onQueryTextChange(p0: String?): Boolean {
+                    return false
+                }
+
+            }
+        )
+
         getNews(1)
     }
 
@@ -63,7 +80,6 @@ class NewsFragment : Fragment() {
                         layoutManager = manager
                     }
                 }
-
             }
         }
     }
