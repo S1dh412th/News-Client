@@ -3,6 +3,10 @@ package com.example.newsclient.presentation.viewmodel
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
@@ -19,7 +23,7 @@ import kotlinx.coroutines.launch
 
 class NewsViewModel(
     private val app: Application
-): AndroidViewModel(app) {
+) : AndroidViewModel(app) {
 
     private val newsRepository = Instance.getNewsRepository()
     private val localRepository: NewsLocalDataSource
@@ -37,10 +41,14 @@ class NewsViewModel(
         val dao = LocalDataSourceInstance.getDatabase(app).getArticleDAO()
         localRepository = NewsLocalDataSourceImpl(dao)
 
-        apikey = sharedPreferences.getString("news_api_key","").toString()
+        apikey = sharedPreferences.getString("news_api_key", "").toString()
 
         viewModelScope.launch {
-            newsMutableFlow.value = newsRepository.getNewsTopHeadlines("bitcoin", apikey)
+            if (checkForInternet()) {
+                newsMutableFlow.value = newsRepository.getNewsTopHeadlines("bitcoin", apikey)
+            } else {
+                Toast.makeText(app, "Internet Connection is not there", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -48,7 +56,7 @@ class NewsViewModel(
         localRepository.saveArticleToDB(article)
     }
 
-    fun getSavedNews() = liveData{
+    fun getSavedNews() = liveData {
         localRepository.getSavedArticles().collect {
             emit(it)
         }
@@ -59,7 +67,27 @@ class NewsViewModel(
     }
 
     fun updateNews(q: String) = viewModelScope.launch {
-        newsMutableFlow.value = newsRepository.getNewsTopHeadlines(q, apikey)
+        if (checkForInternet()) {
+            newsMutableFlow.value = newsRepository.getNewsTopHeadlines(q, apikey)
+        } else {
+            Toast.makeText(app, "Internet Connection is not there", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun checkForInternet(): Boolean {
+
+        val connectivityManager =
+            app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val network = connectivityManager.activeNetwork ?: return false
+
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return when {
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            else -> false
+        }
     }
 
 }
