@@ -45,7 +45,6 @@ class NewsApiTest {
             val request = server.takeRequest()
             assertThat(responseBody).isNotNull()
             assertThat(request.path).isEqualTo("/v2/everything?q=bitcoin&apiKey=2394d5b6f3fa4d62a03c7d5009f0a080")
-
         }
     }
 
