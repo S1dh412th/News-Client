@@ -12,6 +12,7 @@ object Instance {
     private const val BASE_URL = "https://newsapi.org/"
 
     fun getNewsRepository(): NewsRepository {
+
         val okHttpClient = OkHttpClient.Builder().build()
 
         val converterFactory = GsonConverterFactory.create()
@@ -21,5 +22,6 @@ object Instance {
         val newsApi = retrofit.create(NewsApi::class.java)
 
         return NewsRepositoryImpl(newsApi)
+
     }
 }

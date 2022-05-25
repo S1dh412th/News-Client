@@ -39,7 +39,6 @@ class NewsFragment : Fragment() {
                     if (p0 != null) {
                         newsViewModel.updateNews(p0)
                     }
-                    getNews(1)
                     return false
                 }
 
